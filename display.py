@@ -1,8 +1,9 @@
 import pygame as pg
-import numpy as np
+from time import perf_counter
 
 from settings import *
 from sprites.default import Default
+from subscription import Subsciber
 
 # button surface creation
 levels_button = pg.Surface((200, 200))
@@ -28,7 +29,7 @@ def switch_scene(app, scene):
 
 def render_text(text, size, colour):
     font = pg.font.SysFont('Arial', size)
-    return font.render(text, False, colour)
+    return font.render(text, True, colour)
 
 def toggle_pause(app):
     app.current_level.paused = not app.current_level.paused
@@ -67,7 +68,7 @@ class Display:
                                 Default(self.app, (600, 50), dimensions=(50, 50), surface=render_text("||", 500, (255, 255, 255)), action=toggle_pause, args=(self.app,), show_hover=True, align=1),
                                 Default(self.app, (650, 50), dimensions=(50, 50), surface=render_text(">>", 500, (255, 255, 255)), action=speed_change, args=(self.app,2), show_hover=True, align=1),
                                 Default(self.app, (550, 50), dimensions=(50, 50), surface=render_text("<<", 500, (255, 255, 255)), action=speed_change, args=(self.app,1/2), show_hover=True, align=1),
-                                Default(self.app, (600, 100), surface=render_text("next tick", 20, (255, 255, 255)), action=next_tick, args=(self.app,), show_hover=True, align=1),
+                                Default(self.app, (600, 150), surface=render_text("next tick", 20, (255, 255, 255)), action=next_tick, args=(self.app,), show_hover=True, align=1),
                                 Default(self.app, (20, 50), surface=render_text(f"Budget: {str(self.app.current_level.budget)}", 30, (255, 255, 255))),
                                 Default(self.app, (20, 100), surface=render_text(f"Population: {str(self.app.current_level.population)}", 30, (255, 255, 255))),
                                 Default(self.app, (20, 150), surface=render_text(f"Total fire: {str(round(self.app.current_level.total_fire, 2))}", 30, (255, 255, 255))),
@@ -83,11 +84,10 @@ class Display:
         self.surface = pg.Surface(DEFAULT_DIMENSIONS)
 
     def update(self):
+        performance = perf_counter()
         self.surface.fill((0, 0, 0))
 
-        # scene loop
-        for sprite in self.scenes[self.scene]:
-            match self.scene:
+        match self.scene:
                 case "game":
                     self.scenes[self.scene][5].update_surface(render_text(f"Budget: {str(self.app.current_level.budget)}", 30, (255, 255, 255)), update_dimensions=True)
                     self.scenes[self.scene][6].update_surface(render_text(f"Population: {str(self.app.current_level.population)}", 30, (255, 255, 255)), update_dimensions=True)
@@ -97,9 +97,12 @@ class Display:
                     self.scenes[self.scene][2].update_surface(render_text(f"Population: {str(self.app.current_level.population)}", 30, (255, 255, 255)))
                     self.scenes[self.scene][3].update_surface(render_text(f"Fire: {str(round(self.app.current_level.total_fire, 1))}", 30, (255, 255, 255)), update_dimensions=True)
 
+        # scene loop
+        for sprite in self.scenes[self.scene]:
             sprite.update()
 
         self.screen.blit(self.surface, (0, 0))
         pg.display.flip()
+        print(perf_counter() - performance)
 
     

@@ -15,8 +15,7 @@ def align_position(surface, pos, align):
     return pos
 
 class Default:
-    def __init__(self, app, position, dimensions=None, surface=pg.Surface((0, 0)), action=None, args=tuple(), align=0, show_hover=False, hover_colour=(255, 255, 255)) -> None:
-        ''''''
+    def __init__(self, app, position, dimensions=None, surface=pg.Surface((0, 0)), action=None, args=tuple(), align=0, show_hover=False, hover_colour=(255, 255, 255), text=None) -> None:
         self.app = app
 
         self.action = action if action is not None else lambda:None

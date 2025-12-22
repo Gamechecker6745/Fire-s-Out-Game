@@ -1,4 +1,5 @@
 import pygame as pg
+from time import perf_counter
 
 from game_logic.tiles import *
 from game_logic.usables import Backburn, Wildcard, Fireman, TEXTURE_SCALE
@@ -9,11 +10,10 @@ TILE_SIZE = 40
 INVENTORY_SPACING = (60, 60)
 INVENTORY_POS = (300, 420)
 
-class Found(Exception): pass
-
 class Level:
     def __init__(self, app, budget=100, template=None, starting_fires=None) -> None:
         self.app = app
+        self.performance = None
 
         self.position = (300, 100)
 
@@ -74,11 +74,10 @@ class Level:
                 self.map[idy].append(new)
     
     def update(self):
+        self.performance = perf_counter()
         self.delta_time += self.app.delta_time
         if self.delta_time > 1 / self.tick_speed and not self.paused:
             self.tick()
-
-        self.total_fire = 0
 
         hovering_tile = False
         hovering_usable = False
@@ -87,10 +86,11 @@ class Level:
         for row in self.map:
                for tile in row:
                     tile.update(self.position, TILE_SIZE)
-                    self.total_fire += tile.fire
+                    
                     # hovering
                     if tile.hovering:
                         hovering_tile = True
+                        
                         # clicking
                         if self.app.event.left_click:
                             if self.selected_usable is not None and not isinstance(tile.slot, self.selected_usable.__class__) and not isinstance(tile.future_slot, self.selected_usable.__class__):
@@ -121,7 +121,7 @@ class Level:
             x = INVENTORY_POS[0]
 
         # selecting conditions
-        if not (hovering_usable or hovering_tile) and self.app.event.left_click:
+        if not(hovering_usable or hovering_tile) and self.app.event.left_click:
             self.selected_usable = None
             self.selected_tile = None
 
@@ -141,15 +141,18 @@ class Level:
             self.app.display.surface.blit(render_text(f"Slot: {str(self.selected_tile.slot.__class__.__name__)}", 30, (255, 255, 0)), (20, 400))
             if isinstance(self.selected_tile, Dwelling):
                 self.app.display.surface.blit(render_text(f"Population: {str(self.selected_tile.population)}", 30, (255, 255, 0)), (20, 450))
+        self.performance = perf_counter() - self.performance
                   
     def tick(self):
         for row in self.map:
-                for cell in row:
-                    cell.calculate()
+                for tile in row:
+                    tile.calculate()
 
+        self.total_fire = 0
         for row in self.map:
-            for cell in row:
-                cell.tick()
+            for tile in row:
+                tile.tick()
+                self.total_fire += tile.fire
             
         self.delta_time = 0
 

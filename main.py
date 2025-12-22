@@ -5,6 +5,7 @@ from audio import Audio
 from display import Display
 from event import Event
 from game_logic.level import Level
+from debug import Debug
 
 # level templates
 LEVEL_1 = [[1,1,1,1,2],
@@ -34,6 +35,7 @@ class App:
         self.audio = Audio(self)
         self.display = Display(self)
         self.event = Event(self)
+        self.debug = Debug(self)
 
     def reset_levels(self):
         self.levels = [Level(self, budget=180, template=LEVEL_1), 
