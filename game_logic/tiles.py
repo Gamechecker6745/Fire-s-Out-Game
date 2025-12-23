@@ -3,6 +3,7 @@ import pygame as pg
 from time import perf_counter
 
 from game_logic.usables import *
+import numpy as np
 
 SURVIVAL_FUEL = 0.5
 
@@ -57,13 +58,13 @@ class Tile:
 
         # fire spread between cells
         if self.position[1] - 1 >= 0:
-            self.next_burn_state += self.game.map[self.position[1] - 1][self.position[0]].fire * rn.random() * 0.05 * (1-self.slot.spread_limiter) * self.__class__.SPREAD_RATE
+            self.next_burn_state += self.game.map[self.position[1] - 1][self.position[0]].fire * rn.random() * 0.05 * (1-self.slot.spread_limiter) * self.__class__.SPREAD_RATE * np.e ** np.dot(self.game.level.wind, (0,-1))
         if self.position[0] - 1 >= 0:
-            self.next_burn_state += self.game.map[self.position[1]][self.position[0] - 1].fire * rn.random() * 0.05 * (1-self.slot.spread_limiter) * self.__class__.SPREAD_RATE
+            self.next_burn_state += self.game.map[self.position[1]][self.position[0] - 1].fire * rn.random() * 0.05 * (1-self.slot.spread_limiter) * self.__class__.SPREAD_RATE * np.e ** np.dot(self.game.level.wind, (1,0))
         if self.position[1] + 1 < len(self.game.map):
-            self.next_burn_state += self.game.map[self.position[1] + 1][self.position[0]].fire * rn.random() * 0.05 * (1-self.slot.spread_limiter) * self.__class__.SPREAD_RATE
+            self.next_burn_state += self.game.map[self.position[1] + 1][self.position[0]].fire * rn.random() * 0.05 * (1-self.slot.spread_limiter) * self.__class__.SPREAD_RATE * np.e ** np.dot(self.game.level.wind, (0,1))
         if self.position[0] + 1 < len(self.game.map[self.position[1]]): 
-            self.next_burn_state += self.game.map[self.position[1]][self.position[0] + 1].fire * rn.random() * 0.05 * (1-self.slot.spread_limiter) * self.__class__.SPREAD_RATE
+            self.next_burn_state += self.game.map[self.position[1]][self.position[0] + 1].fire * rn.random() * 0.05 * (1-self.slot.spread_limiter) * self.__class__.SPREAD_RATE * np.e ** np.dot(self.game.level.wind, (-1,0))
 
         if self.next_burn_state > 1 or 1 - self.next_burn_state < 0.001:
             self.next_burn_state = 1
